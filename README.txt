@@ -1,0 +1,1 @@
+Excute AutoWeiboSender.HTML with your browser.
