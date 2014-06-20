@@ -1,10 +1,9 @@
-
   var request,response,token;
-  var code=getParam("code");
-  var text = "#ÊµÁ¦ÎŞ¼Û# @ĞÂÀËNBA,@NBAstore,@ÇĞ»»Ì¨,@°²Ì¤ÀºÇò";
-  var encodeText = "%23%e5%ae%9e%e5%8a%9b%e6%97%a0%e4%bb%b7%23+%40%e6%96%b0%e6%b5%aaNBA%2c%40NBAstore%2c%40%e5%88%87%e6%8d%a2%e5%8f%b0%2c%40%e5%ae%89%e8%b8%8f%e7%af%ae%e7%90%83";
-
-
+  var code = getParam("code");
+  var text = "#å®åŠ›æ— ä»·# @æ–°æµªNBA,@NBAstore,@åˆ‡æ¢å°,@å®‰è¸ç¯®çƒ";
+  var encodeText = encodeURIComponent(text);
+  var setCookie,getCookie,list;
+//https://api.weibo.com/oauth2/authorize?client_id=123050457758183&redirect_uri=http://www.example.com/response&response_type=code
 function getParam(paramName) {
     paramValue = "";
     isFound = false;
@@ -26,28 +25,39 @@ function getParam(paramName) {
 
  function getToken(requestCode) {
 	    request = new XMLHttpRequest();
-	    request.open("GET", "https://api.weibo.com/oauth2/access_token?client_id=3872251999&client_secret=3b94cd16bef7e236629bf8a0e670fe9b&grant_type=authorization_code&redirect_uri=http://www.test.com/Chrome%20Plugin/files/AutoWeiboSender.html&code="+requestCode);
+	    request.open("POST", "https://api.weibo.com/oauth2/access_token?client_id=3872251999&client_secret=3b94cd16bef7e236629bf8a0e670fe9b&grant_type=authorization_code&redirect_uri=http://www.test.com/Chrome%20Plugin/files/AutoWeiboSender.html&code="+requestCode);
 	    request.send();
 
-	      if(request.readyState === 4 && request.status === 200){
-		      response = JSON.parse(request.responseText);
-		      token = response.access_token;
+	     if(request.readyState === 4 && request.status === 200){
+		     response = JSON.parse(request.responseText);
+		     token = response.access_token;
 	      }
   }
 
   
   if(code){
                getToken(code);
+	       setCookie = "code" + "=" + encodeURICompnent(code);    //åˆ©ç”¨cookieå‚¨å­˜codeçš„å€¼
+	       setCookie = setCookie + ";max-age=" + (30*60*60*24);
+	       document.cookie=setCookie;
           }
-	else{
-		getToken("3055ba56559ffde72035f0ebae873b5f");
+	else{   
+		getCookie=document.cookie;
+		list = getCookie.split(";");
+		for(var i = 0; i<list.length; i++){
+			var p = list[i].indexOf("=");            //ä»cookieä¸­å–å‡ºcodeçš„å€¼
+			var name = list[i].substring(0,p);
+			var value = list[i].substring(p+1);
+			code = decodeURIComponent(value);
+		}
+			getToken(code);
 	}
 
   WB2.anyWhere(function(W){
                    W.parseCMD(
                               "/statuses/update.json", 
                                function(sResult, bStatus){console.log(sResult, bStatus)},
-                               {access_token:"2.00sswhgC6dZDOE5af9b45d4e01duvj",
+                               {access_token:token,
                                 status:encodeText,
                                 visible:2		   
                                },
